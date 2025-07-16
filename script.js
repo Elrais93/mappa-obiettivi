@@ -1,22 +1,15 @@
-const apiKey = "$2a$10$LfpSWnHyxka5Db1sdFyCZuIJvzxxSiFUNTWhFBGC0615h//REHCZy";
-const binId = "687630a7bb9a9d26e899fdea";
-const headers = {
-  "Content-Type": "application/json",
-  "X-Master-Key": apiKey
-};
-
 let currentFilter = "all";
 
 async function loadGoals() {
-  const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, { headers });
+  const res = await fetch("/api/goals");
   const data = await res.json();
-  return data.record || {};
+  return data || {};
 }
 
 async function saveGoals(goals) {
-  await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+  await fetch("/api/goals", {
     method: "PUT",
-    headers,
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(goals)
   });
 }
@@ -35,69 +28,59 @@ function render(goals) {
     list.className = "goal-list";
     list.setAttribute("data-category", category);
 
-    items.forEach((item) => {
-      if (currentFilter === "done" && !item.done) return;
-      if (currentFilter === "todo" && item.done) return;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (currentFilter === "done" && !item.done) continue;
+      if (currentFilter === "todo" && item.done) continue;
 
       const div = document.createElement("div");
       div.className = "goal";
 
-      const check = document.createElement("input");
-      check.type = "checkbox";
-      check.checked = item.done;
-      check.onchange = async () => {
-        item.done = check.checked;
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = item.done;
+      checkbox.onchange = async () => {
+        item.done = checkbox.checked;
         await saveGoals(goals);
       };
 
-      const label = document.createElement("input");
-      label.type = "text";
-      label.value = item.text;
-      label.onchange = async () => {
-        item.text = label.value;
+      const input = document.createElement("input");
+      input.type = "text";
+      input.value = item.text;
+      input.onchange = async () => {
+        item.text = input.value;
         await saveGoals(goals);
       };
 
-      const delBtn = document.createElement("button");
-      delBtn.textContent = "🗑️";
-      delBtn.onclick = async () => {
-        const confirmDelete = confirm(`Vuoi davvero eliminare: "${item.text}"?`);
-        if (!confirmDelete) return;
-        goals[category] = goals[category].filter(g => g.text !== item.text || g.done !== item.done);
+      const del = document.createElement("button");
+      del.textContent = "🗑️";
+      del.onclick = async () => {
+        goals[category].splice(i, 1);
         await saveGoals(goals);
         init();
       };
 
-      div.appendChild(check);
-      div.appendChild(label);
-      div.appendChild(delBtn);
+      div.appendChild(checkbox);
+      div.appendChild(input);
+      div.appendChild(del);
       list.appendChild(div);
-    });
+    }
 
-    cat.appendChild(list);
-
-    const input = document.createElement("input");
-    input.type = "text";
-    input.placeholder = "Nuovo obiettivo...";
-    input.onkeypress = async (e) => {
-      if (e.key === "Enter" && input.value.trim()) {
-        goals[category].push({ text: input.value.trim(), done: false });
-        await saveGoals(goals);
-        init();
-      }
-    };
-
-    const btn = document.createElement("button");
-    btn.textContent = "+";
-    btn.onclick = async () => {
-      if (!input.value.trim()) return;
-      goals[category].push({ text: input.value.trim(), done: false });
+    const addInput = document.createElement("input");
+    addInput.type = "text";
+    addInput.placeholder = "Nuovo obiettivo...";
+    const addBtn = document.createElement("button");
+    addBtn.textContent = "+";
+    addBtn.onclick = async () => {
+      if (!addInput.value.trim()) return;
+      goals[category].push({ text: addInput.value.trim(), done: false });
       await saveGoals(goals);
       init();
     };
 
-    cat.appendChild(input);
-    cat.appendChild(btn);
+    cat.appendChild(list);
+    cat.appendChild(addInput);
+    cat.appendChild(addBtn);
     container.appendChild(cat);
   });
 }
@@ -113,7 +96,7 @@ async function renameCategory(category) {
 }
 
 async function deleteCategory(category) {
-  if (!confirm("Eliminare categoria?")) return;
+  if (!confirm("Eliminare la categoria?")) return;
   const goals = await loadGoals();
   delete goals[category];
   await saveGoals(goals);
@@ -124,7 +107,7 @@ document.getElementById("add-category").onclick = async () => {
   const name = prompt("Nome nuova categoria:");
   if (!name) return;
   const goals = await loadGoals();
-  if (goals[name]) return alert("Categoria già esistente.");
+  if (goals[name]) return alert("Esiste già.");
   goals[name] = [];
   await saveGoals(goals);
   init();
