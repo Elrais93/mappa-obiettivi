@@ -1,0 +1,56 @@
+{
+  "💻 Progetti Digitali": [
+    {
+      "text": "Incode – Soluzioni Digitali",
+      "done": false
+    },
+    {
+      "text": "DealsOS (10 offerte/giorno)",
+      "done": false
+    },
+    {
+      "text": "Webapp su richiesta",
+      "done": false
+    },
+    {
+      "text": "Prova",
+      "done": true
+    }
+  ],
+  "📺 Canali YouTube": [
+    {
+      "text": "Shorts",
+      "done": false
+    },
+    {
+      "text": "Reaction (in forse)",
+      "done": false
+    },
+    {
+      "text": "Guide/Tutorial",
+      "done": false
+    }
+  ],
+  "💸 Obiettivi Economici": [
+    {
+      "text": "Raggiungere 10.000 € in 3 mesi",
+      "done": false
+    }
+  ],
+  "🔕 Progetti Non Attivi": [
+    {
+      "text": "SentryFX (sospeso)",
+      "done": false
+    },
+    {
+      "text": "Solo Italia News (privato)",
+      "done": false
+    }
+  ],
+  "📈 Idee Future": [
+    {
+      "text": "Espandere lista progetti",
+      "done": false
+    }
+  ]
+}
