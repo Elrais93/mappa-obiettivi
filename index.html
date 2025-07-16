@@ -2,14 +2,18 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mappa Obiettivi</title>
-  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <h1>Mappa Obiettivi</h1>
+  <div id="filters">
+    <button id="filter-all">Tutti</button>
+    <button id="filter-todo">Incompleti</button>
+    <button id="filter-done">Completati</button>
+    <button id="add-category">➕ Aggiungi categoria</button>
+  </div>
   <div id="goal-list"></div>
-  <button id="add-category">+ Aggiungi Categoria</button>
 
   <script src="script.js"></script>
 </body>
