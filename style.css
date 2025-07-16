@@ -1,0 +1,36 @@
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 1rem;
+  background: #f4f4f4;
+}
+h1 {
+  text-align: center;
+}
+.category {
+  background: #fff;
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 6px;
+}
+.category h2 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.goal {
+  display: flex;
+  align-items: center;
+  margin-top: .5rem;
+}
+.goal input[type="checkbox"] {
+  margin-right: .5rem;
+}
+button, input[type="text"] {
+  padding: 0.4rem 0.6rem;
+  margin-top: 0.5rem;
+}
+input[type="text"] {
+  width: calc(100% - 1rem);
+  margin-bottom: 0.5rem;
+}
