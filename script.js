@@ -38,17 +38,15 @@ function render(goals) {
     list.ondrop = (e) => handleDrop(e, goals);
     list.ondragover = (e) => e.preventDefault();
 
-    items.forEach((item, idx) => {
+    items.forEach((item) => {
       if (currentFilter === "done" && !item.done) return;
       if (currentFilter === "todo" && item.done) return;
 
       const div = document.createElement("div");
       div.className = "goal";
       div.setAttribute("draggable", true);
-      div.setAttribute("data-idx", idx);
-
       div.ondragstart = (e) => {
-        e.dataTransfer.setData("text/plain", JSON.stringify({ category, idx }));
+        e.dataTransfer.setData("text/plain", JSON.stringify({ category, text: item.text }));
       };
 
       const check = document.createElement("input");
@@ -71,9 +69,14 @@ function render(goals) {
       delBtn.textContent = "🗑️";
       delBtn.onclick = async () => {
         if (!confirm("Vuoi eliminare questo obiettivo?")) return;
-        goals[category].splice(idx, 1);
-        await saveGoals(goals);
-        init();
+        const updated = await loadGoals();
+        const realList = updated[category];
+        const realIndex = realList.findIndex(i => i.text === item.text && i.done === item.done);
+        if (realIndex >= 0) {
+          realList.splice(realIndex, 1);
+          await saveGoals(updated);
+          init();
+        }
       };
 
       div.appendChild(check);
@@ -111,15 +114,17 @@ function render(goals) {
 
 function handleDrop(e, goals) {
   e.preventDefault();
-  const { category, idx } = JSON.parse(e.dataTransfer.getData("text/plain"));
+  const { category, text } = JSON.parse(e.dataTransfer.getData("text/plain"));
   const dropCategory = e.currentTarget.getAttribute("data-category");
-  const dropIdx = [...e.currentTarget.children].indexOf(document.elementFromPoint(e.clientX, e.clientY).closest(".goal"));
-  if (category === dropCategory && dropIdx >= 0) {
-    const item = goals[category].splice(idx, 1)[0];
-    goals[category].splice(dropIdx, 0, item);
-    saveGoals(goals);
-    init();
-  }
+  if (!goals[category] || !goals[dropCategory]) return;
+
+  const dragItemIndex = goals[category].findIndex(i => i.text === text);
+  if (dragItemIndex === -1) return;
+  const item = goals[category].splice(dragItemIndex, 1)[0];
+  goals[dropCategory].push(item);
+
+  saveGoals(goals);
+  init();
 }
 
 async function renameCategory(category) {
