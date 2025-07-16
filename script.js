@@ -1,3 +1,5 @@
+alert("✅ Script aggiornato");
+
 let currentFilter = "all";
 
 async function loadGoals() {
