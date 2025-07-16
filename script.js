@@ -70,11 +70,9 @@ function render(goals) {
       const delBtn = document.createElement("button");
       delBtn.textContent = "🗑️";
       delBtn.onclick = async () => {
-        const confirmDelete = confirm(`Vuoi davvero eliminare l'obiettivo: "${item.text}"?`);
-        if (!confirmDelete) return;
-        const updated = await loadGoals();
-        updated[category].splice(idx, 1);
-        await saveGoals(updated);
+        if (!confirm("Vuoi eliminare questo obiettivo?")) return;
+        goals[category].splice(idx, 1);
+        await saveGoals(goals);
         init();
       };
 
