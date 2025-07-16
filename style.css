@@ -17,6 +17,10 @@ h1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  cursor: pointer;
+}
+.goal-list {
+  margin-top: 1rem;
 }
 .goal {
   display: flex;
