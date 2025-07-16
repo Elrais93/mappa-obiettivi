@@ -1,5 +1,3 @@
-let currentFilter = "all";
-
 async function loadGoals() {
   const res = await fetch("/api/goals");
   const data = await res.json();
@@ -35,8 +33,6 @@ function render(goals) {
 
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
-      if (currentFilter === "done" && !item.done) continue;
-      if (currentFilter === "todo" && item.done) continue;
 
       const div = document.createElement("div");
       div.className = "goal";
@@ -169,10 +165,6 @@ document.getElementById("add-category").onclick = async () => {
   await saveGoals(goals);
   init();
 };
-
-document.getElementById("filter-all").onclick = () => { currentFilter = "all"; init(); };
-document.getElementById("filter-todo").onclick = () => { currentFilter = "todo"; init(); };
-document.getElementById("filter-done").onclick = () => { currentFilter = "done"; init(); };
 
 async function init() {
   const data = await loadGoals();
