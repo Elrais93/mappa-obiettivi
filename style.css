@@ -26,10 +26,16 @@ h1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.7rem;
-  margin-bottom: 0.5rem;
-  cursor: pointer;
 }
+
+.category h2 span {
+  flex: 1;
+}
+
+.category h2 button {
+  margin-left: 0.4rem;
+}
+
 
 .goal {
   display: flex;
