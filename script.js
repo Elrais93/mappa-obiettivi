@@ -60,9 +60,69 @@ function render(goals) {
         init();
       };
 
+      const subtasksBtn = document.createElement("button");
+      subtasksBtn.textContent = "🧩";
+      const subtasksDiv = document.createElement("div");
+      subtasksDiv.className = "subtasks hidden";
+
+      subtasksBtn.onclick = () => {
+        subtasksDiv.classList.toggle("hidden");
+      };
+
+      item.subtasks = item.subtasks || [];
+
+      item.subtasks.forEach((sub, sidx) => {
+        const subDiv = document.createElement("div");
+        subDiv.className = "subtask";
+
+        const subCheck = document.createElement("input");
+        subCheck.type = "checkbox";
+        subCheck.checked = sub.done;
+        subCheck.onchange = async () => {
+          sub.done = subCheck.checked;
+          await saveGoals(goals);
+        };
+
+        const subInput = document.createElement("input");
+        subInput.type = "text";
+        subInput.value = sub.text;
+        subInput.onchange = async () => {
+          sub.text = subInput.value;
+          await saveGoals(goals);
+        };
+
+        const subDel = document.createElement("button");
+        subDel.textContent = "🗑️";
+        subDel.onclick = async () => {
+          item.subtasks.splice(sidx, 1);
+          await saveGoals(goals);
+          init();
+        };
+
+        subDiv.appendChild(subCheck);
+        subDiv.appendChild(subInput);
+        subDiv.appendChild(subDel);
+        subtasksDiv.appendChild(subDiv);
+      });
+
+      const subInput = document.createElement("input");
+      subInput.placeholder = "Nuovo sottopunto...";
+      subInput.onkeypress = async (e) => {
+        if (e.key === "Enter" && subInput.value.trim()) {
+          item.subtasks.push({ text: subInput.value.trim(), done: false });
+          await saveGoals(goals);
+          init();
+        }
+      };
+
+      subtasksDiv.appendChild(subInput);
+
       div.appendChild(checkbox);
       div.appendChild(input);
       div.appendChild(del);
+      div.appendChild(subtasksBtn);
+      div.appendChild(subtasksDiv);
+
       list.appendChild(div);
     }
 
@@ -73,7 +133,7 @@ function render(goals) {
     addBtn.textContent = "+";
     addBtn.onclick = async () => {
       if (!addInput.value.trim()) return;
-      goals[category].push({ text: addInput.value.trim(), done: false });
+      goals[category].push({ text: addInput.value.trim(), done: false, subtasks: [] });
       await saveGoals(goals);
       init();
     };
