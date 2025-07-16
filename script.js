@@ -38,18 +38,15 @@ function render(goals) {
     list.ondrop = (e) => handleDrop(e, goals);
     list.ondragover = (e) => e.preventDefault();
 
-    for (let idx = 0; idx < items.length; idx++) {
-      const item = items[idx];
-      if (currentFilter === "done" && !item.done) continue;
-      if (currentFilter === "todo" && item.done) continue;
+    items.forEach((item) => {
+      if (currentFilter === "done" && !item.done) return;
+      if (currentFilter === "todo" && item.done) return;
 
       const div = document.createElement("div");
       div.className = "goal";
       div.setAttribute("draggable", true);
-      div.setAttribute("data-idx", idx);
-
       div.ondragstart = (e) => {
-        e.dataTransfer.setData("text/plain", JSON.stringify({ category, idx }));
+        e.dataTransfer.setData("text/plain", JSON.stringify({ category, text: item.text }));
       };
 
       const check = document.createElement("input");
@@ -68,26 +65,25 @@ function render(goals) {
         await saveGoals(goals);
       };
 
- const delBtn = document.createElement("button");
-delBtn.textContent = "🗑️";
-delBtn.onclick = async () => {
-  const confirmDelete = confirm(`Vuoi davvero eliminare l'obiettivo: "${item.text}"?`);
-  if (!confirmDelete) return;
+      const delBtn = document.createElement("button");
+      delBtn.textContent = "🗑️";
+      delBtn.onclick = async () => {
+        const confirmDelete = confirm(`Vuoi davvero eliminare l'obiettivo: "${item.text}"?`);
+        if (!confirmDelete) return;
 
-  const updatedGoals = await loadGoals();
-  const currentItems = updatedGoals[category] || [];
-  updatedGoals[category] = currentItems.filter((g, index) => index !== idx);
-  await saveGoals(updatedGoals);
-  init();
-};
-
+        const updatedGoals = await loadGoals();
+        updatedGoals[category] = updatedGoals[category].filter(
+          (g) => !(g.text === item.text && g.done === item.done)
+        );
+        await saveGoals(updatedGoals);
+        init();
       };
 
       div.appendChild(check);
       div.appendChild(label);
       div.appendChild(delBtn);
       list.appendChild(div);
-    }
+    });
 
     cat.appendChild(list);
 
@@ -118,15 +114,16 @@ delBtn.onclick = async () => {
 
 function handleDrop(e, goals) {
   e.preventDefault();
-  const { category, idx } = JSON.parse(e.dataTransfer.getData("text/plain"));
+  const { category, text } = JSON.parse(e.dataTransfer.getData("text/plain"));
   const dropCategory = e.currentTarget.getAttribute("data-category");
-  const dropIdx = [...e.currentTarget.children].indexOf(document.elementFromPoint(e.clientX, e.clientY).closest(".goal"));
-  if (category === dropCategory && dropIdx >= 0) {
-    const item = goals[category].splice(idx, 1)[0];
-    goals[category].splice(dropIdx, 0, item);
-    saveGoals(goals);
-    init();
-  }
+
+  const draggedItem = goals[category].find((g) => g.text === text);
+  if (!draggedItem) return;
+
+  goals[category] = goals[category].filter((g) => g !== draggedItem);
+  goals[dropCategory].push(draggedItem);
+  saveGoals(goals);
+  init();
 }
 
 async function renameCategory(category) {
