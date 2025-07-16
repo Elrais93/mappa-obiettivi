@@ -38,9 +38,10 @@ function render(goals) {
     list.ondrop = (e) => handleDrop(e, goals);
     list.ondragover = (e) => e.preventDefault();
 
-    items.forEach((item, idx) => {
-      if (currentFilter === "done" && !item.done) return;
-      if (currentFilter === "todo" && item.done) return;
+    for (let idx = 0; idx < items.length; idx++) {
+      const item = items[idx];
+      if (currentFilter === "done" && !item.done) continue;
+      if (currentFilter === "todo" && item.done) continue;
 
       const div = document.createElement("div");
       div.className = "goal";
@@ -81,7 +82,7 @@ function render(goals) {
       div.appendChild(label);
       div.appendChild(delBtn);
       list.appendChild(div);
-    });
+    }
 
     cat.appendChild(list);
 
