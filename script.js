@@ -1,4 +1,3 @@
-// script.js
 const apiKey = "$2a$10$LfpSWnHyxka5Db1sdFyCZuIJvzxxSiFUNTWhFBGC0615h//REHCZy";
 const binId = "687630a7bb9a9d26e899fdea";
 const headers = {
@@ -35,8 +34,6 @@ function render(goals) {
     const list = document.createElement("div");
     list.className = "goal-list";
     list.setAttribute("data-category", category);
-    list.ondrop = (e) => handleDrop(e, goals);
-    list.ondragover = (e) => e.preventDefault();
 
     items.forEach((item) => {
       if (currentFilter === "done" && !item.done) return;
@@ -44,10 +41,6 @@ function render(goals) {
 
       const div = document.createElement("div");
       div.className = "goal";
-      div.setAttribute("draggable", true);
-      div.ondragstart = (e) => {
-        e.dataTransfer.setData("text/plain", JSON.stringify({ category, text: item.text }));
-      };
 
       const check = document.createElement("input");
       check.type = "checkbox";
@@ -68,14 +61,10 @@ function render(goals) {
       const delBtn = document.createElement("button");
       delBtn.textContent = "🗑️";
       delBtn.onclick = async () => {
-        const confirmDelete = confirm(`Vuoi davvero eliminare l'obiettivo: "${item.text}"?`);
+        const confirmDelete = confirm(`Vuoi davvero eliminare: "${item.text}"?`);
         if (!confirmDelete) return;
-
-        const updatedGoals = await loadGoals();
-        updatedGoals[category] = updatedGoals[category].filter(
-          (g) => !(g.text === item.text && g.done === item.done)
-        );
-        await saveGoals(updatedGoals);
+        goals[category] = goals[category].filter(g => g.text !== item.text || g.done !== item.done);
+        await saveGoals(goals);
         init();
       };
 
@@ -106,28 +95,15 @@ function render(goals) {
       await saveGoals(goals);
       init();
     };
+
     cat.appendChild(input);
     cat.appendChild(btn);
     container.appendChild(cat);
   });
 }
 
-function handleDrop(e, goals) {
-  e.preventDefault();
-  const { category, text } = JSON.parse(e.dataTransfer.getData("text/plain"));
-  const dropCategory = e.currentTarget.getAttribute("data-category");
-
-  const draggedItem = goals[category].find((g) => g.text === text);
-  if (!draggedItem) return;
-
-  goals[category] = goals[category].filter((g) => g !== draggedItem);
-  goals[dropCategory].push(draggedItem);
-  saveGoals(goals);
-  init();
-}
-
 async function renameCategory(category) {
-  const newName = prompt("Nuovo nome per la categoria:", category);
+  const newName = prompt("Nuovo nome categoria:", category);
   if (!newName || newName === category) return;
   const goals = await loadGoals();
   goals[newName] = goals[category];
@@ -137,7 +113,7 @@ async function renameCategory(category) {
 }
 
 async function deleteCategory(category) {
-  if (!confirm("Sei sicuro di voler eliminare questa categoria?")) return;
+  if (!confirm("Eliminare categoria?")) return;
   const goals = await loadGoals();
   delete goals[category];
   await saveGoals(goals);
