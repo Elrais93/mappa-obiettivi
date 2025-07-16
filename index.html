@@ -17,6 +17,10 @@
   </div>
   <button id="add-category">+ Aggiungi Categoria</button>
   <div id="goal-list"></div>
-<script src="script.js?v=99"></script>
+<script>
+  const script = document.createElement("script");
+  script.src = "script.js?v=" + new Date().getTime();
+  document.body.appendChild(script);
+</script>
 </body>
 </html>
