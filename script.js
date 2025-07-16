@@ -20,13 +20,18 @@ function render(goals) {
   Object.entries(goals).forEach(([category, items]) => {
     const cat = document.createElement("div");
     cat.className = "category";
+
     const h2 = document.createElement("h2");
     h2.innerHTML = `<span>${category}</span> <button onclick="renameCategory('${category}')">✏️</button> <button onclick="deleteCategory('${category}')">🗑️</button>`;
     cat.appendChild(h2);
 
     const list = document.createElement("div");
-    list.className = "goal-list";
+    list.className = "goal-list hidden";
     list.setAttribute("data-category", category);
+
+    h2.onclick = () => {
+      list.classList.toggle("hidden");
+    };
 
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
@@ -60,69 +65,61 @@ function render(goals) {
         init();
       };
 
-      const subtasksBtn = document.createElement("button");
-      subtasksBtn.textContent = "🧩";
-      const subtasksDiv = document.createElement("div");
-      subtasksDiv.className = "subtasks hidden";
-
-      subtasksBtn.onclick = () => {
+      const condBtn = document.createElement("button");
+      condBtn.textContent = "🧩";
+      condBtn.onclick = () => {
         subtasksDiv.classList.toggle("hidden");
       };
 
-      item.subtasks = item.subtasks || [];
+      const subtasksDiv = document.createElement("div");
+      subtasksDiv.className = "subtasks hidden";
 
-      item.subtasks.forEach((sub, sidx) => {
+      (item.subtasks || []).forEach((sub, idx) => {
         const subDiv = document.createElement("div");
         subDiv.className = "subtask";
 
-        const subCheck = document.createElement("input");
-        subCheck.type = "checkbox";
-        subCheck.checked = sub.done;
-        subCheck.onchange = async () => {
-          sub.done = subCheck.checked;
-          await saveGoals(goals);
-        };
-
         const subInput = document.createElement("input");
         subInput.type = "text";
-        subInput.value = sub.text;
+        subInput.value = sub;
         subInput.onchange = async () => {
-          sub.text = subInput.value;
+          item.subtasks[idx] = subInput.value;
           await saveGoals(goals);
         };
 
         const subDel = document.createElement("button");
         subDel.textContent = "🗑️";
         subDel.onclick = async () => {
-          item.subtasks.splice(sidx, 1);
+          item.subtasks.splice(idx, 1);
           await saveGoals(goals);
           init();
         };
 
-        subDiv.appendChild(subCheck);
         subDiv.appendChild(subInput);
         subDiv.appendChild(subDel);
         subtasksDiv.appendChild(subDiv);
       });
 
-      const subInput = document.createElement("input");
-      subInput.placeholder = "Nuovo sottopunto...";
-      subInput.onkeypress = async (e) => {
-        if (e.key === "Enter" && subInput.value.trim()) {
-          item.subtasks.push({ text: subInput.value.trim(), done: false });
-          await saveGoals(goals);
-          init();
-        }
+      const addSub = document.createElement("input");
+      addSub.type = "text";
+      addSub.placeholder = "Aggiungi sottopunto...";
+      const addBtn = document.createElement("button");
+      addBtn.textContent = "+";
+      addBtn.onclick = async () => {
+        if (!addSub.value.trim()) return;
+        item.subtasks = item.subtasks || [];
+        item.subtasks.push(addSub.value.trim());
+        await saveGoals(goals);
+        init();
       };
 
-      subtasksDiv.appendChild(subInput);
+      subtasksDiv.appendChild(addSub);
+      subtasksDiv.appendChild(addBtn);
 
       div.appendChild(checkbox);
       div.appendChild(input);
+      div.appendChild(condBtn);
       div.appendChild(del);
-      div.appendChild(subtasksBtn);
       div.appendChild(subtasksDiv);
-
       list.appendChild(div);
     }
 
@@ -133,7 +130,7 @@ function render(goals) {
     addBtn.textContent = "+";
     addBtn.onclick = async () => {
       if (!addInput.value.trim()) return;
-      goals[category].push({ text: addInput.value.trim(), done: false, subtasks: [] });
+      goals[category].push({ text: addInput.value.trim(), done: false });
       await saveGoals(goals);
       init();
     };
